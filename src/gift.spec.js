@@ -1,4 +1,5 @@
 import {addGift, toggleReservation} from './gifts'
+import {setAutoFreeze} from 'immer'
 
 const initialState = {
   users: [
@@ -48,9 +49,16 @@ describe('Reserving an unreserved gift', () => {
     expect(nextState).not.toBe(initialState)
     expect(nextState.gifts[0]).toBe(initialState.gifts[0])
   })
+
+  test("can't accidentally modify the produced state", () => {
+    expect(() => {
+      nextState.gifts[1].reservedBy = undefined
+    }).toThrow()
+  })
 })
 
 describe('Reserving an unreserved gift', () => {
+  setAutoFreeze(false)
   const nextState = toggleReservation(initialState, 'egghead_subscription')
 
   test('correctly stores reservedBy', () => {
@@ -67,5 +75,11 @@ describe('Reserving an already reserved gift', () => {
 
   test('preserves stored reservedBy', () => {
     expect(nextState.gifts[0].reservedBy).toBe(2) // Someone else
+  })
+
+  test('no new gift should be created', () => {
+    expect(nextState.gifts[0]).toEqual(initialState.gifts[0])
+    expect(nextState.gifts[0]).toBe(initialState.gifts[0])
+    expect(nextState).toBe(initialState)
   })
 })
