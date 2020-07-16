@@ -1,9 +1,8 @@
 import React, {useState, useCallback, memo} from 'react'
 import ReactDOM from 'react-dom'
 import uuidv4 from 'uuid/v4'
-import {useImmer} from 'use-immer'
 
-import {getInitialState} from './gifts'
+import {getInitialState, addGift, toggleReservation} from './gifts'
 
 import './misc/index.css'
 
@@ -28,41 +27,29 @@ const Gift = memo(function Gift({gift, users, currentUser, onReserve}) {
 })
 
 function GiftList() {
-  const [state, updateState] = useImmer(() => getInitialState())
+  const [state, setState] = useState(() => getInitialState())
   const {users, gifts, currentUser} = state
 
   const handleAdd = () => {
     const description = prompt('Gift to add')
     if (description) {
-      updateState(draft => {
-        draft.gifts.push({
-          id: uuidv4(),
+      setState(state =>
+        addGift(
+          state,
+          uuidv4(),
           description,
-          image: `https://picsum.photos/id/${Math.round(
-            Math.random() * 1000,
-          )}/200/200`,
-          reservedBy: undefined,
-        })
-      })
+          'https://picsum.photos/200?q=' + Math.random(),
+        ),
+      )
     }
   }
 
   const handleReserve = useCallback(id => {
-    updateState(draft => {
-      const gift = draft.gifts.find(gift => gift.id === id)
-      gift.reservedBy =
-        gift.reservedBy === undefined
-          ? draft.currentUser.id
-          : gift.reservedBy === draft.currentUser.id
-          ? undefined
-          : gift.reservedBy
-    })
+    setState(state => toggleReservation(state, id))
   }, [])
 
   const handleReset = () => {
-    updateState(() => {
-      return getInitialState()
-    })
+    setState(() => getInitialState())
   }
 
   return (
