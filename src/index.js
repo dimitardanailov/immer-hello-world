@@ -9,6 +9,7 @@ import {
 } from './gifts'
 
 import './misc/index.css'
+import {useSocket} from './misc/useSocket'
 
 const Gift = memo(function Gift({gift, users, currentUser, onReserve}) {
   return (
@@ -34,12 +35,18 @@ function GiftList() {
   const [state, setState] = useState(() => getInitialState())
   const {users, gifts, currentUser} = state
 
+  const send = useSocket('ws://localhost:5001', function onMessage(patches) {
+    // we received some patches
+    console.dir(patches)
+  })
+
   const dispatch = useCallback(action => {
     setState(currentState => {
       const [nextState, patches] = patchGeneratingGiftsReducer(
         currentState,
         action,
       )
+      send(patches)
       console.log(patches)
       return nextState
     })
