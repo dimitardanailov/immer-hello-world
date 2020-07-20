@@ -2,7 +2,13 @@ import React, {useState, useCallback, memo} from 'react'
 import ReactDOM from 'react-dom'
 import uuidv4 from 'uuid/v4'
 
-import {getInitialState, addGift, toggleReservation} from './gifts'
+import {
+  getInitialState,
+  addGift,
+  toggleReservation,
+  getBookDetails,
+  addBook,
+} from './gifts'
 
 import './misc/index.css'
 
@@ -52,6 +58,14 @@ function GiftList() {
     setState(() => getInitialState())
   }
 
+  const handleBook = async () => {
+    const isbn = prompt('Enter ISBN number', '0201558025')
+    if (isbn) {
+      const details = await getBookDetails(isbn)
+      setState(state => addBook(state, details))
+    }
+  }
+
   return (
     <div className="app">
       <div className="header">
@@ -60,6 +74,7 @@ function GiftList() {
       <div className="actions">
         <button onClick={handleAdd}>Add</button>
         <button onClick={handleReset}>Reset</button>
+        <button onClick={handleBook}>Add a book</button>
       </div>
       <div className="gifts">
         {gifts.map(gift => (

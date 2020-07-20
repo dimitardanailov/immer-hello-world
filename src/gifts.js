@@ -26,6 +26,29 @@ export function toggleReservation(state, giftId) {
   })
 }
 
+export async function getBookDetails(isbn) {
+  const response = await fetch(
+    `http://openlibrary.org/api/books?bibkeys=ISBN:${isbn}&jscmd=data&format=json`,
+    {
+      mode: 'cors',
+    },
+  )
+
+  const book = (await response.json())['ISBN:' + isbn]
+  return book
+}
+
+export function addBook(state, book) {
+  return produce(state, draft => {
+    draft.gifts.push({
+      id: book.isbn,
+      description: book.title,
+      image: book.cover.medium,
+      reservedBy: undefined,
+    })
+  })
+}
+
 export function getInitialState() {
   return {
     users: allUsers,

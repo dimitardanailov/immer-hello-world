@@ -1,4 +1,4 @@
-import {addGift, toggleReservation} from './gifts'
+import {addGift, toggleReservation, getBookDetails, addBook} from './gifts'
 import {setAutoFreeze} from 'immer'
 
 const initialState = {
@@ -81,5 +81,23 @@ describe('Reserving an already reserved gift', () => {
     expect(nextState.gifts[0]).toEqual(initialState.gifts[0])
     expect(nextState.gifts[0]).toBe(initialState.gifts[0])
     expect(nextState).toBe(initialState)
+  })
+})
+
+describe('Can add book async', () => {
+  test('Can add math book', async () => {
+    const details = await getBookDetails('0201558025')
+    const nextState = await addBook(initialState, details)
+    expect(nextState.gifts[2].description).toBe('Concrete mathematics')
+  })
+
+  test('Can add two books in parallel', async () => {
+    const promise1 = getBookDetails('0201558025')
+    const promise2 = getBookDetails('9781598560169')
+    const nextState = addBook(
+      addBook(initialState, await promise1),
+      await promise2,
+    )
+    expect(nextState.gifts.length).toBe(4)
   })
 })
