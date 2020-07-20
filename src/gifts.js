@@ -1,4 +1,4 @@
-import produce, {produceWithPatches, enablePatches} from 'immer'
+import produce, {produceWithPatches, enablePatches, applyPatches} from 'immer'
 
 import {allUsers, getCurrentUser} from './misc/users'
 import defaultGifts from './misc/gifts.json'
@@ -36,6 +36,8 @@ export const giftsRecipe = (draft, action) => {
       break
     case 'RESET':
       return getInitialState()
+    case 'APPLY_PATCHES':
+      return applyPatches(draft, action.patches)
     default:
       return getInitialState()
   }

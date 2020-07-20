@@ -3,7 +3,7 @@ import {
   getBookDetails,
   patchGeneratingGiftsReducer,
 } from './gifts'
-import {setAutoFreeze} from 'immer'
+import {setAutoFreeze, applyPatches} from 'immer'
 
 const initialState = {
   users: [
@@ -80,6 +80,17 @@ describe('Reserving an unreserved gift', () => {
   test("didn't the original state", () => {
     expect(initialState.gifts[1].reservedBy).toBe(undefined)
   })
+})
+
+describe('Reserving an unreserved gift with patches', () => {
+  const [nextState, patches] = patchGeneratingGiftsReducer(initialState, {
+    type: 'TOGGLE_RESERVATION',
+    id: 'egghead_subscription',
+  })
+
+  test('correctly stores reservedBy', () => {
+    expect(nextState.gifts[1].reservedBy).toBe(1) // Test user
+  })
 
   test('generates the correct patches', () => {
     expect(patches).toEqual([
@@ -89,6 +100,19 @@ describe('Reserving an unreserved gift', () => {
         value: 1,
       },
     ])
+  })
+
+  test('replaying patches produces the same state - 1', () => {
+    expect(applyPatches(initialState, patches)).toEqual(nextState)
+  })
+
+  test('replaying patches produces the same state - 2', () => {
+    expect(
+      giftsReducer(initialState, {
+        type: 'APPLY_PATCHES',
+        patches,
+      }),
+    ).toEqual(nextState)
   })
 })
 

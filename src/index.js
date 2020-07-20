@@ -6,6 +6,7 @@ import {
   getInitialState,
   getBookDetails,
   patchGeneratingGiftsReducer,
+  giftsReducer,
 } from './gifts'
 
 import './misc/index.css'
@@ -37,7 +38,7 @@ function GiftList() {
 
   const send = useSocket('ws://localhost:5001', function onMessage(patches) {
     // we received some patches
-    console.dir(patches)
+    setState(state => giftsReducer(state, {type: 'APPLY_PATCHES', patches}))
   })
 
   const dispatch = useCallback(action => {
