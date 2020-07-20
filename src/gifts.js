@@ -1,9 +1,11 @@
-import produce from 'immer'
+import produce, {produceWithPatches, enablePatches} from 'immer'
 
 import {allUsers, getCurrentUser} from './misc/users'
 import defaultGifts from './misc/gifts.json'
 
-export const giftsReducer = produce((draft, action) => {
+enablePatches()
+
+export const giftsRecipe = (draft, action) => {
   switch (action.type) {
     case 'ADD_GIFT':
       const {id, description, image} = action
@@ -37,7 +39,13 @@ export const giftsReducer = produce((draft, action) => {
     default:
       return getInitialState()
   }
-})
+}
+
+// (state, action) => state
+export const giftsReducer = produce(giftsRecipe)
+
+// (state, action) => [state, patches, inversePatches]
+export const patchGeneratingGiftsReducer = produceWithPatches(giftsRecipe)
 
 export async function getBookDetails(isbn) {
   const response = await fetch(

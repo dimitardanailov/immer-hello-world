@@ -1,4 +1,8 @@
-import {giftsReducer, getBookDetails} from './gifts'
+import {
+  giftsReducer,
+  getBookDetails,
+  patchGeneratingGiftsReducer,
+} from './gifts'
 import {setAutoFreeze} from 'immer'
 
 const initialState = {
@@ -64,7 +68,7 @@ describe('Reserving an unreserved gift', () => {
 
 describe('Reserving an unreserved gift', () => {
   setAutoFreeze(false)
-  const nextState = giftsReducer(initialState, {
+  const [nextState, patches] = patchGeneratingGiftsReducer(initialState, {
     type: 'TOGGLE_RESERVATION',
     id: 'egghead_subscription',
   })
@@ -75,6 +79,16 @@ describe('Reserving an unreserved gift', () => {
 
   test("didn't the original state", () => {
     expect(initialState.gifts[1].reservedBy).toBe(undefined)
+  })
+
+  test('generates the correct patches', () => {
+    expect(patches).toEqual([
+      {
+        op: 'replace',
+        path: ['gifts', 1, 'reservedBy'],
+        value: 1,
+      },
+    ])
   })
 })
 

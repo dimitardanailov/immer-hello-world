@@ -1,8 +1,12 @@
-import React, {useReducer, memo, useCallback} from 'react'
+import React, {useState, memo, useCallback} from 'react'
 import ReactDOM from 'react-dom'
 import uuidv4 from 'uuid/v4'
 
-import {getInitialState, getBookDetails, giftsReducer} from './gifts'
+import {
+  getInitialState,
+  getBookDetails,
+  patchGeneratingGiftsReducer,
+} from './gifts'
 
 import './misc/index.css'
 
@@ -27,8 +31,19 @@ const Gift = memo(function Gift({gift, users, currentUser, onReserve}) {
 })
 
 function GiftList() {
-  const [state, dispatch] = useReducer(giftsReducer, getInitialState())
+  const [state, setState] = useState(() => getInitialState())
   const {users, gifts, currentUser} = state
+
+  const dispatch = useCallback(action => {
+    setState(currentState => {
+      const [nextState, patches] = patchGeneratingGiftsReducer(
+        currentState,
+        action,
+      )
+      console.log(patches)
+      return nextState
+    })
+  }, [])
 
   const handleAdd = () => {
     const description = prompt('Gift to add')
@@ -44,12 +59,15 @@ function GiftList() {
     }
   }
 
-  const handleReserve = useCallback(id => {
-    dispatch({
-      type: 'TOGGLE_RESERVATION',
-      id,
-    })
-  }, [])
+  const handleReserve = useCallback(
+    id => {
+      dispatch({
+        type: 'TOGGLE_RESERVATION',
+        id,
+      })
+    },
+    [dispatch],
+  )
 
   const handleReset = () => {
     dispatch({type: 'RESET'})
