@@ -34,6 +34,8 @@ export const giftsReducer = produce((draft, action) => {
       break
     case 'RESET':
       return getInitialState()
+    default:
+      return getInitialState()
   }
 })
 
